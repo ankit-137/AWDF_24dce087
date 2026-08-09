@@ -4,8 +4,8 @@ function Skills({ skillList }) {
       <h2>My Skills</h2>
       <div className="skills-grid">
         {skillList.map((skill, index) => (
-          <span key={index} className="skill-tag">
-            {skill}
+          <span style={{ gap: "1rem" }} key={index} className="skill-tag">
+            {skill + "  |  "}
           </span>
         ))}
       </div>

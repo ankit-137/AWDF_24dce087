@@ -7,7 +7,7 @@ function Home() {
 
   return (
     <div>
-      <Header name="Student Portfolio" themeColor="#6366f1" />
+      <Header name="Ankit's Portfolio" themeColor="#63bbf1ff" />
       <About />
       <Skills skillList={mySkills} />
     </div>

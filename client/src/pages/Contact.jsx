@@ -40,7 +40,7 @@ function Contact() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Jane Doe"
+            placeholder="Ankit Patel"
             required
           />
         </div>
@@ -51,22 +51,14 @@ function Contact() {
             rows={6}
             value={message}
             onChange={(e) => setMessage(e.target.value.slice(0, MAX_CHARS))}
-            placeholder="Type your message here…"
+            placeholder="Leave your thoughts here.."
             required
           />
           <p className="char-counter">
             {message.length} / {MAX_CHARS} characters
           </p>
         </div>
-        
-        {/* Real-time input display */}
-        <div style={{ padding: '1rem', backgroundColor: 'var(--bg)', border: '1px solid #ccc', borderRadius: '4px', marginBottom: '1rem' }}>
-          <strong>Real-time Preview:</strong>
-          <p style={{ marginTop: '0.5rem' }}><em>Name:</em> {name || '(Type a name above)'}</p>
-          <p><em>Message:</em> {message || '(Type a message above)'}</p>
-        </div>
-
-        <button type="submit" className="btn-primary">Send Message →</button>
+        <button type="submit" className="btn-primary">Send Message </button>
       </form>
     </div>
   );
