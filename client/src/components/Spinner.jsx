@@ -1,8 +1,8 @@
-function Spinner() {
+function Spinner({ message = 'Loading...' }) {
   return (
     <div className="spinner-wrap">
       <div className="spinner" role="status" aria-label="Loading" />
-      <p>Fetching repositories…</p>
+      <p>{message}</p>
     </div>
   );
 }

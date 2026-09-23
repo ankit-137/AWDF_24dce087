@@ -7,6 +7,7 @@ function NavBar({ isDarkMode, setIsDarkMode }) {
       <ul>
         <li><NavLink to="/" end>Home</NavLink></li>
         <li><NavLink to="/projects">Projects</NavLink></li>
+        <li><NavLink to="/tasks">Tasks</NavLink></li>
         <li><NavLink to="/contact">Contact</NavLink></li>
       </ul>
       <button className="toggle-btn" onClick={() => setIsDarkMode(!isDarkMode)}>

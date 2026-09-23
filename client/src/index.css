@@ -159,3 +159,161 @@ footer {
 @keyframes spin { 
   to { transform: rotate(360deg); } 
 }
+
+/* ─── Tasks Page ─────────────────────────────────────────────── */
+.tasks-page h2 {
+  margin-bottom: 0.25rem;
+}
+
+.tasks-subtitle {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 1.5rem;
+}
+
+.task-form-section,
+.task-list-section {
+  margin-bottom: 2rem;
+}
+
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.required { color: crimson; }
+
+.btn-create {
+  align-self: flex-start;
+  padding: 0.5rem 1.25rem;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.btn-create:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-create:hover:not(:disabled) { background: #2563eb; }
+
+/* ─── Task List ──────────────────────────────────────────────── */
+.task-count { font-size: 0.9rem; color: #888; font-weight: normal; }
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.task-card {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: border-color 0.2s;
+}
+
+.dark-mode .task-card { border-color: #444; }
+
+.task-card.task-completed { opacity: 0.55; }
+
+.task-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.task-check {
+  margin-top: 4px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.task-title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.task-card.task-completed .task-title {
+  text-decoration: line-through;
+}
+
+.task-desc {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.dark-mode .task-desc { color: #aaa; }
+
+.task-date {
+  font-size: 0.78rem;
+  color: #999;
+}
+
+/* ─── Inline Edit ────────────────────────────────────────────── */
+.task-edit-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.task-edit-input {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.95rem;
+  border: 1px solid #3b82f6;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.task-edit-error { font-size: 0.8rem; color: crimson; }
+
+.task-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ─── Task Action Buttons ────────────────────────────────────── */
+.task-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-edit, .btn-save, .btn-cancel, .btn-delete, .btn-retry {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.82rem;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn-edit   { border-color: #6b7280; color: #374151; background: transparent; }
+.btn-save   { background: #22c55e; color: #fff; border: none; }
+.btn-cancel { background: transparent; border-color: #9ca3af; color: #6b7280; }
+.btn-delete { background: transparent; border-color: #ef4444; color: #ef4444; }
+.btn-retry  { background: #3b82f6; color: #fff; border: none; margin-top: 0.5rem; padding: 0.4rem 1rem; }
+
+.btn-delete:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.dark-mode .btn-edit   { color: #d1d5db; border-color: #6b7280; }
+.dark-mode .btn-cancel { color: #9ca3af; border-color: #6b7280; }
+
+.tasks-empty { color: #888; font-style: italic; }
+
