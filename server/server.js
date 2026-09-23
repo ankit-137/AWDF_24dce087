@@ -1,44 +1,32 @@
-/**
- * server.js — Entry point for the Task Management API
- *
- * Middleware pipeline order (important):
- *   1. requestLogger   — logs every request
- *   2. express.json()  — parses JSON bodies
- *   3. requireJson     — rejects POST/PUT without Content-Type: application/json
- *   4. /api/tasks      — task CRUD routes
- *   5. 404 catch-all   — for unmatched routes
- *   6. errorHandler    — global error handler (MUST be last)
- */
-
+import 'dotenv/config';
 import express from 'express';
+import { connectDB } from './config/db.js';
 import { requestLogger } from './middleware/logger.js';
 import { requireJson } from './middleware/contentType.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import taskRoutes from './routes/tasks.js';
 
+// ── Connect to MongoDB before starting the server ──────────────────────────
+await connectDB();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ── 1. Request logging ─────────────────────────────────────────
 app.use(requestLogger);
 
-// ── 2. Parse JSON request bodies ───────────────────────────────
 app.use(express.json());
-
-// ── 3. Content-Type guard for POST / PUT ───────────────────────
+//for only accepting JSON responses
 app.use(requireJson);
 
-// ── 4. API routes ──────────────────────────────────────────────
 app.use('/api/tasks', taskRoutes);
 
-// ── 5. 404 — no route matched ──────────────────────────────────
+
 app.use((req, res, next) => {
   const err = new Error(`Route not found: ${req.method} ${req.originalUrl}`);
   err.status = 404;
   next(err);
 });
 
-// ── 6. Global error handler (must be last) ─────────────────────
 app.use(errorHandler);
 
 app.listen(PORT, () => {
