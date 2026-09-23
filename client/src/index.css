@@ -317,3 +317,70 @@ footer {
 
 .tasks-empty { color: #888; font-style: italic; }
 
+/* ─── Auth Pages ─────────────────────────────────────────────── */
+.auth-page {
+  max-width: 420px;
+  margin: 2rem auto;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.btn-auth {
+  padding: 0.6rem 1.5rem;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.btn-auth:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-auth:hover:not(:disabled) { background: #2563eb; }
+
+.auth-switch {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.auth-switch a { color: #3b82f6; text-decoration: underline; }
+
+/* ─── NavBar Auth Controls ───────────────────────────────────── */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-user {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.btn-logout {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.82rem;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-logout:hover { background: #ef4444; color: #fff; }
+
+.btn-login-link {
+  font-size: 0.9rem;
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.btn-login-link:hover { text-decoration: underline; }
+
+

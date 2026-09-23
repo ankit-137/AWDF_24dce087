@@ -2,9 +2,20 @@
  * src/api/tasks.js
  * Centralized API layer — all fetch calls to the backend live here.
  * Every function returns the parsed JSON on success and throws on failure.
+ *
+ * All requests include the JWT token from localStorage for authentication.
  */
 
 const BASE = '/api/tasks';
+
+// Helper: get auth headers with JWT token
+function authHeaders() {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+}
 
 // Helper: parse response, throw structured error on non-2xx
 async function handleResponse(res) {
@@ -20,7 +31,7 @@ async function handleResponse(res) {
 
 // GET /api/tasks
 export async function fetchTasks() {
-  const res = await fetch(BASE);
+  const res = await fetch(BASE, { headers: authHeaders() });
   return handleResponse(res);
 }
 
@@ -28,7 +39,7 @@ export async function fetchTasks() {
 export async function createTask(body) {
   const res = await fetch(BASE, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders(),
     body: JSON.stringify(body),
   });
   return handleResponse(res);
@@ -38,7 +49,7 @@ export async function createTask(body) {
 export async function updateTask(id, body) {
   const res = await fetch(`${BASE}/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders(),
     body: JSON.stringify(body),
   });
   return handleResponse(res);
@@ -46,6 +57,9 @@ export async function updateTask(id, body) {
 
 // DELETE /api/tasks/:id
 export async function deleteTask(id) {
-  const res = await fetch(`${BASE}/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${BASE}/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
   return handleResponse(res);
 }

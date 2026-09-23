@@ -2,11 +2,12 @@
  * models/Task.js
  * Mongoose schema and model for the Task resource.
  *
- * Fields (as per Practical 5 requirements):
+ * Fields:
  *   title       – String, required
  *   description – String, optional (default: '')
  *   completed   – Boolean, default false
  *   createdAt   – Date, default Date.now
+ *   user        – ObjectId, ref to User (set by auth middleware)
  */
 
 import mongoose from 'mongoose';
@@ -30,6 +31,11 @@ const taskSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
   },
 });
 

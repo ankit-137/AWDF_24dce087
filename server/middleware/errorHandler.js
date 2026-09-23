@@ -33,6 +33,15 @@ export function errorHandler(err, req, res, next) {
     });
   }
 
+  // ── Mongoose Duplicate Key Error ───────────────────────────────────────────
+  // Thrown when a unique index constraint is violated (e.g. duplicate email)
+  if (err.code === 11000) {
+    const field = Object.keys(err.keyValue)[0];
+    return res.status(409).json({
+      error: `An account with that ${field} already exists.`,
+    });
+  }
+
   // ── Generic Error ──────────────────────────────────────────────────────────
   const status = err.status || 500;
   res.status(status).json({
