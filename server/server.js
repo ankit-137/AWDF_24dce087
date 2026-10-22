@@ -7,9 +7,13 @@ import { requireJson } from './middleware/contentType.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './routes/auth.js';
 import taskRoutes from './routes/tasks.js';
+import { registerTaskHandlers } from './events/taskHandlers.js';
 
 // ── Connect to MongoDB before starting the server ──────────────────────────
 await connectDB();
+
+// ── Register EventEmitter listeners before any requests arrive ─────────────
+registerTaskHandlers();
 
 const app = express();
 const PORT = process.env.PORT || 3000;

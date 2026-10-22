@@ -5,6 +5,42 @@
  * All routes are protected by the authenticate middleware (JWT required).
  * Server-side validation runs BEFORE hitting the database.
  * Each task is scoped to the authenticated user (req.user.id).
+ *
+ * ── In-memory caching (node-cache) ────────────────────────────────────────────
+ * Strategy: Cache-aside (read-through invalidation on writes)
+ *
+ *   GET /tasks (list)
+ *     Cache key : "tasks:<userId>"
+ *     Cache HIT : return cached array immediately, skip MongoDB query.
+ *     Cache MISS: query MongoDB → store result in cache → return data.
+ *     TTL       : 60 seconds (configured in config/cache.js)
+ *
+ *   POST / PUT / DELETE
+ *     After a successful write to MongoDB, delete the user's cache key so
+ *     the next GET /tasks always reflects the latest data (no stale reads).
+ *
+ * Response headers added for observability:
+ *   X-Cache : "HIT"  — data served from cache
+ *   X-Cache : "MISS" — data served from MongoDB (and now cached)
+ *
+ * ── Event-Driven Architecture (EventEmitter) ──────────────────────────────────
+ * Strategy: Asynchronous post-response notifications via Node.js EventEmitter
+ *
+ *   POST /tasks
+ *     After saving to MongoDB AND after res.json(201) is sent:
+ *       emit('task-created', { taskId, title, userId, userEmail, createdAt })
+ *
+ *     The event listener (registered in events/taskHandlers.js) runs inside
+ *     setImmediate(), which means it fires in the NEXT event-loop iteration —
+ *     AFTER the HTTP response has already been dispatched to the client.
+ *
+ *     Timeline (visible in server console):
+ *       [T+0]  POST /api/tasks arrives
+ *       [T+1]  Task saved to MongoDB
+ *       [T+2]  emit('task-created') called    ← schedules handler
+ *       [T+2]  res.status(201).json(saved)    ← client receives response NOW
+ *       [T+3]  setImmediate handler fires     ← notification logged AFTER
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
 import { Router } from 'express';
@@ -12,6 +48,8 @@ import { validateId } from '../middleware/validateId.js';
 import { authenticate } from '../middleware/auth.js';
 import { validateTaskCreate, validateTaskUpdate } from '../middleware/validate.js';
 import Task from '../models/Task.js';
+import cache, { taskListKey } from '../config/cache.js';
+import taskEmitter from '../events/taskEmitter.js';
 
 const router = Router();
 
@@ -21,7 +59,20 @@ router.use(authenticate);
 // ── GET /tasks  → return all tasks for the logged-in user (200) ────────────
 router.get('/', async (req, res, next) => {
   try {
-    const tasks = await Task.find({ user: req.user.id });
+    const cacheKey = taskListKey(req.user.id);
+    const cached   = cache.get(cacheKey);
+
+    if (cached !== undefined) {
+      // ── Cache HIT ──────────────────────────────────────────────────────────
+      res.setHeader('X-Cache', 'HIT');
+      return res.status(200).json(cached);
+    }
+
+    // ── Cache MISS: query MongoDB, then store result ────────────────────────
+    const tasks = await Task.find({ user: req.user.id }).lean();
+    cache.set(cacheKey, tasks);   // stored with the 60 s TTL from config
+
+    res.setHeader('X-Cache', 'MISS');
     res.status(200).json(tasks);
   } catch (err) {
     next(err);
@@ -29,6 +80,8 @@ router.get('/', async (req, res, next) => {
 });
 
 // ── GET /tasks/:id  → return one task (200 | 400 | 404) ───────────────────
+// No caching for single-task lookups — they are infrequent and require
+// fine-grained invalidation that adds complexity without measurable benefit.
 router.get('/:id', validateId, async (req, res, next) => {
   try {
     const task = await Task.findOne({ _id: req.taskId, user: req.user.id });
@@ -57,6 +110,25 @@ router.post('/', validateTaskCreate, async (req, res, next) => {
     });
     const saved = await task.save();
 
+    // ── Invalidate cache so next GET /tasks fetches fresh data ──────────────
+    cache.del(taskListKey(req.user.id));
+
+    // ── Emit 'task-created' BEFORE responding so the event is queued ────────
+    // The listener runs inside setImmediate(), meaning it fires in the next
+    // event-loop iteration — AFTER res.json() delivers the response to the
+    // client. This proves the notification is truly asynchronous and does
+    // NOT add any latency to the HTTP response.
+    taskEmitter.emit('task-created', {
+      taskId    : saved._id.toString(),
+      title     : saved.title,
+      userId    : req.user.id,
+      userEmail : req.user.email,          // decoded from JWT by authenticate
+      createdAt : saved.createdAt ?? new Date().toISOString(),
+    });
+
+    // ── Respond to client immediately (before setImmediate handler runs) ─────
+    const responseTimestamp = new Date().toISOString();
+    console.log(`[${responseTimestamp}] POST /api/tasks  → 201  [EVENT: task-created queued]`);
     res.status(201).json(saved);
   } catch (err) {
     next(err);
@@ -80,6 +152,9 @@ router.put('/:id', validateId, validateTaskUpdate, async (req, res, next) => {
       return next(err);
     }
 
+    // ── Invalidate cache ────────────────────────────────────────────────────
+    cache.del(taskListKey(req.user.id));
+
     res.status(200).json(updated);
   } catch (err) {
     next(err);
@@ -95,6 +170,10 @@ router.delete('/:id', validateId, async (req, res, next) => {
       err.status = 404;
       return next(err);
     }
+
+    // ── Invalidate cache ────────────────────────────────────────────────────
+    cache.del(taskListKey(req.user.id));
+
     res.status(200).json({ message: 'Task deleted successfully.', task: deleted });
   } catch (err) {
     next(err);
